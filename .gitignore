@@ -1,2 +1,5 @@
 # bkp
 *.bkp
+
+test/img/*
+!test/img/.gitkeep
