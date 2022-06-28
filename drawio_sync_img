@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# get path of the script
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+# run the python script with arguments
+python3 ${script_dir}/drawio_sync_img.py $@
