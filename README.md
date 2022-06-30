@@ -16,7 +16,8 @@ export PATH=$PATH:/path/this/folder
 
 Run the following command
 ```
-$ drawio_sync_img -f path/to/drawio/file -o path/output/folder {-a} {-p x}
+$ drawio_sync_img -f path/to/drawio/file -o path/output/folder {-a} {-p x} {-t x}
+# x = number
 $ drawio_sync_img --help
 usage: drawio_sync_img.py [-h] -f FILE [-o OUTPUT] [-a] [-p PAGE] [-t THREADS]
 
