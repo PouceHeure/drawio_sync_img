@@ -33,6 +33,13 @@ def save_pages_to_imgs_by_cmds(cmds):
     for cmd in cmds:
         os.system(cmd)
 
+def devide_list_into_n_sublists(raw_list,n_sublists):
+    sublists = [[] for _ in range(n_sublists)]
+    i = 0
+    for i in range(len(raw_list)): 
+        sublists[i%n_sublists].append(raw_list[i])
+    return sublists
+
 def sync_img_from_drawio_file(drawio_file,output_folder,
                         sync_all_pages=False,
                         page_to_sync=-1,
@@ -78,10 +85,10 @@ def sync_img_from_drawio_file(drawio_file,output_folder,
         path_img = os.path.join(output_folder,f"{page_name}.{format}")
         cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd}"
         cmds.append(cmd)
-    # define cmds by thread
+    # handle case where n_threads is upper then len(pages)
     n_threads = min(n_threads,len(pages))
-    n_elements = math.ceil(len(pages)/n_threads)
-    cmds_by_thread = [cmds[i:i+n_elements] for i in range(0,len(cmds),n_elements)]
+    # define cmds by thread
+    cmds_by_thread = devide_list_into_n_sublists(cmds,n_sublists=n_threads)
     threads = []
     # create thread and start it
     for i_thread in range(n_threads):
