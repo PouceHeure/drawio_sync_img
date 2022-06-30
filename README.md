@@ -1,7 +1,8 @@
 # drawio_sync_img
 
-Synchronizes the pages of a drawio document. 
+Synchronizes the pages of a drawio document.
 The script saves each page in an image with the same page name.
+The script saves synchronization information about previous saves avoiding to re-save image not updated.
 
 ## Setup 
 
