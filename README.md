@@ -5,7 +5,8 @@ The script saves each page in an image with the same page name.
 
 ## Setup 
 
-- install drawio software (need drawio commands line) refer to: [https://github.com/jgraph/drawio-desktop/releases/](https://github.com/jgraph/drawio-desktop/releases/) 
+- install drawio software (need drawio commands line) refer to: [https://github.com/jgraph/drawio-desktop/releases/](https://github.com/jgraph/drawio-desktop/releases/)
+- install yaml python lib: `pip3 install pyyaml`
 
 - use the script such as a command line, inside your bashrc or zshrc insert the following line: 
 ```bash
@@ -16,10 +17,10 @@ export PATH=$PATH:/path/this/folder
 
 Run the following command
 ```
-$ drawio_sync_img -f path/to/drawio/file -o path/output/folder {-a} {-p x} {-t x}
+$ drawio_sync_img -f path/to/drawio/file -o path/output/folder {-a} {-p x} {-t x} {--force}
 # x = number
 $ drawio_sync_img --help
-usage: drawio_sync_img.py [-h] -f FILE [-o OUTPUT] [-a] [-p PAGE] [-t THREADS]
+usage: drawio_sync_img.py [-h] -f FILE [-o OUTPUT] [-a] [-p PAGE] [-t THREADS] [--force]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -30,6 +31,7 @@ optional arguments:
   -p PAGE, --page PAGE  sync specific page number from the drawio file
   -t THREADS, --threads THREADS
                         threads number
+  --force               force sync all images
 ```
 
 

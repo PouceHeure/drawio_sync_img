@@ -1,12 +1,16 @@
 #!/usr/bin/python3
 
 import os
+import yaml
 import argparse
 import xml.etree.ElementTree as ET
 import threading
+import hashlib
 
 
-def extract_pages_name_information_from_drawio_file(drawio_file):
+FILE_SYNC_NAME = ".drawio_sync_img.yaml"
+
+def extract_pages_information_from_drawio_file(drawio_file):
     """extract pages name from drawio xml file
 
     Args:
@@ -20,10 +24,11 @@ def extract_pages_name_information_from_drawio_file(drawio_file):
     pages = {}
     page_n = 0
     for child in root:
-        pages[page_n] = child.attrib["name"]
+        pages[page_n] = {}
+        pages[page_n]["name"] = child.attrib["name"]
+        pages[page_n]["hash"] = int(hashlib.sha1(child.text.encode('utf-8')).hexdigest(), 16)
         page_n += 1
     return pages
-
 
 def save_pages_to_imgs_by_cmds(cmds):
     """save pages into images from cmd instructions
@@ -34,7 +39,6 @@ def save_pages_to_imgs_by_cmds(cmds):
     for cmd in cmds:
         os.system(cmd)
 
-
 def devide_list_into_n_sublists(raw_list, n_sublists):
     sublists = [[] for _ in range(n_sublists)]
     i = 0
@@ -42,12 +46,24 @@ def devide_list_into_n_sublists(raw_list, n_sublists):
         sublists[i % n_sublists].append(raw_list[i])
     return sublists
 
+def save_sync_information(sync_information_file,pages_information):
+    with open(sync_information_file, 'w') as outfile:
+        yaml.dump(pages_information, outfile, default_flow_style=False)
+
+def load_sync_information(sync_information_file):
+    data = None
+    if(not os.path.exists(sync_information_file)): 
+        return {}
+    with open(sync_information_file) as file:
+        data = yaml.load(file, Loader=yaml.FullLoader)
+    return data
 
 def sync_img_from_drawio_file(drawio_file, output_folder,
                               sync_all_pages=False,
                               page_to_sync=-1,
                               format="png",
                               n_threads=4,
+                              force_sync=False,
                               kwargs={}):
     """
     Synhronize images from drawio file.
@@ -67,15 +83,17 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
     if(not sync_all_pages and page_to_sync == -1):
         print("sync impossible, chose all pages or a specific page")
         return -1
+    sync_file_path = os.path.join(os.path.dirname(drawio_file),FILE_SYNC_NAME)
+    previous_sync_information = load_sync_information(sync_information_file=sync_file_path)
     # get information per page
-    pages = extract_pages_name_information_from_drawio_file(drawio_file)
+    pages_information = extract_pages_information_from_drawio_file(drawio_file)
     # sync one page, check page exist
     if(not sync_all_pages):
-        if(pages.get(page_to_sync) == None):
+        if(pages_information.get(page_to_sync) == None):
             print("sync impossible, page number unknown")
             return -1
         else:
-            pages = {page_to_sync: pages[page_to_sync]}
+            pages_information = {page_to_sync: pages_information[page_to_sync]}
     # adapt other args
     kwargs_cmd = ""
     for arg, value in kwargs.items():
@@ -85,12 +103,17 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
         os.makedirs(output_folder)
     # create all cmds (1 cmd per page)
     cmds = []
-    for page_num, page_name in pages.items():
+    for page_num, page_information in pages_information.items():
+        page_name = page_information["name"]
         path_img = os.path.join(output_folder, f"{page_name}.{format}")
-        cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd}"
-        cmds.append(cmd)
+        page_information["path"] = os.path.join(os.getcwd(),path_img)
+        page_was_updated = previous_sync_information.get(page_num) != page_information
+        # sync only if the image isn't sync (or in force mode)
+        if(force_sync or (not force_sync and page_was_updated)):
+            cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd}"
+            cmds.append(cmd)
     # handle case where n_threads is upper then len(pages)
-    n_threads = min(n_threads, len(pages))
+    n_threads = min(n_threads, len(pages_information))
     # define cmds by thread
     cmds_by_thread = devide_list_into_n_sublists(cmds, n_sublists=n_threads)
     threads = []
@@ -103,6 +126,7 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
     # join thread
     for thread in threads:
         thread.join()
+    save_sync_information(sync_file_path,pages_information)
     return 0
 
 
@@ -118,6 +142,8 @@ if __name__ == "__main__":
                         type=int, default=-1)
     parser.add_argument("-t", "--threads", help="threads number",
                         type=int, default=4)
+    parser.add_argument("--force", help="force sync all images",
+                        action="store_true", default=False)
 
     args, unknown = parser.parse_known_args()
 
@@ -133,6 +159,7 @@ if __name__ == "__main__":
                                        sync_all_pages=args.all_pages,
                                        page_to_sync=args.page,
                                        n_threads=args.threads,
+                                       force_sync=args.force,
                                        kwargs=unknown_args)
 
     exit(succes)

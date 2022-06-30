@@ -3,3 +3,5 @@
 
 test/img/*
 !test/img/.gitkeep
+test/*
+!test/test_multi_pages.drawio
