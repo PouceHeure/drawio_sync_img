@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import threading
 import hashlib
 
-
+# methods: get information about drawio
 
 def extract_pages_information_from_drawio_file(drawio_file):
     """extract pages name from drawio xml file
@@ -29,6 +29,8 @@ def extract_pages_information_from_drawio_file(drawio_file):
         page_n += 1
     return pages
 
+# methods: save imgs
+
 def save_pages_to_imgs_by_cmds(cmds):
     """save pages into images from cmd instructions
 
@@ -38,20 +40,13 @@ def save_pages_to_imgs_by_cmds(cmds):
     for cmd in cmds:
         os.system(cmd)
 
-def devide_list_into_n_sublists(raw_list, n_sublists):
-    sublists = [[] for _ in range(n_sublists)]
-    i = 0
-    for i in range(len(raw_list)):
-        sublists[i % n_sublists].append(raw_list[i])
-    return sublists
-
+# methods: sync
 
 def define_sync_file_path(drawio_file):
     drawio_file_name = os.path.splitext(os.path.basename(drawio_file))[0]
     drawio_folder = os.path.dirname(drawio_file)
     sync_file_name = f".sync.{drawio_file_name}.yaml"
     return os.path.join(drawio_folder,sync_file_name)
-
 
 def save_sync_information(sync_information_file,pages_information):
     with open(sync_information_file, 'w') as outfile:
@@ -64,6 +59,15 @@ def load_sync_information(sync_information_file):
     with open(sync_information_file) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
     return data
+
+# methods: utils
+
+def devide_list_into_n_sublists(raw_list, n_sublists):
+    sublists = [[] for _ in range(n_sublists)]
+    i = 0
+    for i in range(len(raw_list)):
+        sublists[i % n_sublists].append(raw_list[i])
+    return sublists
 
 def sync_img_from_drawio_file(drawio_file, output_folder,
                               sync_all_pages=False,
@@ -79,8 +83,9 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
         output_folder (str): output folder where image will be saved
         sync_all_pages (bool, optional): force all images to be saved. Defaults to False.
         page_to_sync (int, optional):  specific the page number to save. Defaults to -1.
-        n_threads (int, optional): threads number. Defaults to 4.
         format (str, optional): format img generated. Defaults to "png".
+        n_threads (int, optional): threads number. Defaults to 4.
+        force_sync (bool, optional): force sync even the img is already update. Defaults to False.
         kwargs (dict, optional): others args to give to 'drawio' cmd. Defaults to {}.
 
     Returns:
