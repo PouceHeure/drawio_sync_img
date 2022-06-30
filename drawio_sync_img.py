@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
 import os
+import math
 import argparse
 import xml.etree.ElementTree as ET
+import threading
 
 def extract_pages_name_information_from_drawio_file(drawio_file):
     """extract pages name from drawio xml file
@@ -22,10 +24,20 @@ def extract_pages_name_information_from_drawio_file(drawio_file):
         page_n += 1
     return pages
 
+def save_pages_to_imgs_by_cmds(cmds):
+    """save pages into images from cmd instructions
+
+    Args:
+        cmds (list(str)): list of cmd to execute 
+    """
+    for cmd in cmds:
+        os.system(cmd)
+
 def sync_img_from_drawio_file(drawio_file,output_folder,
                         sync_all_pages=False,
                         page_to_sync=-1,
                         format="png",
+                        n_threads=4,
                         kwargs={}):
     """
     Synhronize images from drawio file.
@@ -60,11 +72,25 @@ def sync_img_from_drawio_file(drawio_file,output_folder,
     # check if the output folder exist 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-    # run cmd per page
+    # create all cmds (1 cmd per page) 
+    cmds = []
     for page_num, page_name in pages.items(): 
         path_img = os.path.join(output_folder,f"{page_name}.{format}")
         cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd}"
-        os.system(cmd)
+        cmds.append(cmd)
+    # define cmds by thread
+    n_threads = min(n_threads,len(pages))
+    n_elements = math.ceil(len(pages)/n_threads)
+    cmds_by_thread = [cmds[i:i+n_elements] for i in range(0,len(cmds),n_elements)]
+    threads = []
+    # create thread and start it
+    for i_thread in range(n_threads):
+        thread = threading.Thread(target=save_pages_to_imgs_by_cmds, args=(cmds_by_thread[i_thread],))
+        threads.append(thread)
+        thread.start()
+    # join thread
+    for thread in threads:  
+        thread.join()
     return 0
     
 
@@ -78,6 +104,8 @@ if __name__=="__main__":
                         action="store_true",default=True)
     parser.add_argument("-p", "--page", help="sync specific page number from the drawio file",
                         type=int,default=-1)
+    parser.add_argument("-t", "--threads", help="threads number",
+                        type=int,default=4)
 
     args, unknown = parser.parse_known_args()
         
@@ -92,6 +120,7 @@ if __name__=="__main__":
             output_folder=args.output,
             sync_all_pages=args.all_pages,
             page_to_sync=args.page,
+            n_threads=args.threads,
             kwargs=unknown_args)
 
     exit(succes)
