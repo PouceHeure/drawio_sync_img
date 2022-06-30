@@ -1,7 +1,7 @@
 # drawio_sync_img
 
-goal: Synchronizes the pages of a drawio document. 
-The script takes care of saving each page in an image with the same page name.
+Synchronizes the pages of a drawio document. 
+The script saves each page in an image with the same page name.
 
 ## Setup 
 
@@ -18,7 +18,7 @@ Run the following command
 ```
 $ drawio_sync_img -f path/to/drawio/file -o path/output/folder {-a} {-p x}
 $ drawio_sync_img --help
-usage: drawio_sync_img.py [-h] -f FILE [-o OUTPUT] [-a] [-p PAGE]
+usage: drawio_sync_img.py [-h] -f FILE [-o OUTPUT] [-a] [-p PAGE] [-t THREADS]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -27,6 +27,8 @@ optional arguments:
                         folder where image will be saved
   -a, --all-pages       sync all pages from the drawio file
   -p PAGE, --page PAGE  sync specific page number from the drawio file
+  -t THREADS, --threads THREADS
+                        threads number
 ```
 
 
