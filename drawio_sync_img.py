@@ -53,6 +53,7 @@ def sync_img_from_drawio_file(drawio_file,output_folder,
         output_folder (str): output folder where image will be saved
         sync_all_pages (bool, optional): force all images to be saved. Defaults to False.
         page_to_sync (int, optional):  specific the page number to save. Defaults to -1.
+        n_threads (int, optional): threads number. Defaults to 4.
         format (str, optional): format img generated. Defaults to "png".
         kwargs (dict, optional): others args to give to 'drawio' cmd. Defaults to {}.
 
