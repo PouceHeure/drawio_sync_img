@@ -8,7 +8,6 @@ import threading
 import hashlib
 
 
-FILE_SYNC_NAME = ".drawio_sync_img.yaml"
 
 def extract_pages_information_from_drawio_file(drawio_file):
     """extract pages name from drawio xml file
@@ -45,6 +44,14 @@ def devide_list_into_n_sublists(raw_list, n_sublists):
     for i in range(len(raw_list)):
         sublists[i % n_sublists].append(raw_list[i])
     return sublists
+
+
+def define_sync_file_path(drawio_file):
+    drawio_file_name = os.path.splitext(os.path.basename(drawio_file))[0]
+    drawio_folder = os.path.dirname(drawio_file)
+    sync_file_name = f".sync.{drawio_file_name}.yaml"
+    return os.path.join(drawio_folder,sync_file_name)
+
 
 def save_sync_information(sync_information_file,pages_information):
     with open(sync_information_file, 'w') as outfile:
@@ -83,7 +90,7 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
     if(not sync_all_pages and page_to_sync == -1):
         print("sync impossible, chose all pages or a specific page")
         return -1
-    sync_file_path = os.path.join(os.path.dirname(drawio_file),FILE_SYNC_NAME)
+    sync_file_path = define_sync_file_path(drawio_file)
     previous_sync_information = load_sync_information(sync_information_file=sync_file_path)
     # get information per page
     pages_information = extract_pages_information_from_drawio_file(drawio_file)
