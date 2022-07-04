@@ -56,8 +56,13 @@ def define_sync_file_path(drawio_file):
 
 
 def save_sync_information(sync_information_file, pages_information):
-    with open(sync_information_file, 'w') as outfile:
-        yaml.dump(pages_information, outfile, default_flow_style=False)
+    try: 
+        with open(sync_information_file, 'w') as outfile:
+            yaml.dump(pages_information, outfile, default_flow_style=False)
+    except yaml.YAMLError as e:
+        print(f"error can't write file, {e}")
+        return False
+    return True
 
 
 def load_sync_information(sync_information_file):
