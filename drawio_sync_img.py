@@ -113,11 +113,12 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
     pages_information = extract_pages_information_from_drawio_file(drawio_file)
     # sync one page, check page exist
     if(not sync_all_pages):
-        if(pages_information.get(page_to_sync) == None):
+        page_to_sync_information = pages_information.get(page_to_sync) 
+        if(page_to_sync_information == None):
             print("sync impossible, page number unknown")
             return -1
         else:
-            pages_information = {page_to_sync: pages_information[page_to_sync]}
+            pages_information = {page_to_sync: page_to_sync_information}
     # adapt other args
     kwargs_cmd = ""
     for arg, value in kwargs.items():
