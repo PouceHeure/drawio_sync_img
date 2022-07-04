@@ -7,16 +7,17 @@ import xml.etree.ElementTree as ET
 import threading
 import hashlib
 
-# methods: get information about drawio
+
+# methods: get information about drawio document
+
 
 def extract_pages_information_from_drawio_file(drawio_file):
-    """extract pages name from drawio xml file
-
+    """extract pages information from drawio xml file
     Args:
         drawio_file (str): drawio_file path
 
     Returns:
-        dict: {page_number:page_name}
+        dict: information about document
     """
     tree = ET.parse(drawio_file)
     root = tree.getroot()
@@ -25,13 +26,16 @@ def extract_pages_information_from_drawio_file(drawio_file):
     for child in root:
         pages[page_n] = {}
         pages[page_n]["name"] = child.attrib["name"]
-        pages[page_n]["hash"] = int(hashlib.sha1(child.text.encode('utf-8')).hexdigest(), 16)
+        pages[page_n]["hash"] = int(hashlib.sha1(
+            child.text.encode('utf-8')).hexdigest(), 16)
         page_n += 1
     return pages
 
-# methods: save imgs
 
-def save_pages_to_imgs_by_cmds(cmds):
+# methods: execute command
+
+
+def execute_pool_commands(cmds):
     """save pages into images from cmd instructions
 
     Args:
@@ -40,21 +44,25 @@ def save_pages_to_imgs_by_cmds(cmds):
     for cmd in cmds:
         os.system(cmd)
 
+
 # methods: sync
+
 
 def define_sync_file_path(drawio_file):
     drawio_file_name = os.path.splitext(os.path.basename(drawio_file))[0]
     drawio_folder = os.path.dirname(drawio_file)
     sync_file_name = f".sync.{drawio_file_name}.yaml"
-    return os.path.join(drawio_folder,sync_file_name)
+    return os.path.join(drawio_folder, sync_file_name)
 
-def save_sync_information(sync_information_file,pages_information):
+
+def save_sync_information(sync_information_file, pages_information):
     with open(sync_information_file, 'w') as outfile:
         yaml.dump(pages_information, outfile, default_flow_style=False)
 
+
 def load_sync_information(sync_information_file):
     data = None
-    if(not os.path.exists(sync_information_file)): 
+    if(not os.path.exists(sync_information_file)):
         return {}
     with open(sync_information_file) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
@@ -62,12 +70,15 @@ def load_sync_information(sync_information_file):
 
 # methods: utils
 
+
 def devide_list_into_n_sublists(raw_list, n_sublists):
     sublists = [[] for _ in range(n_sublists)]
-    i = 0
     for i in range(len(raw_list)):
         sublists[i % n_sublists].append(raw_list[i])
     return sublists
+
+# methods: pipeline
+
 
 def sync_img_from_drawio_file(drawio_file, output_folder,
                               sync_all_pages=False,
@@ -89,14 +100,15 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
         kwargs (dict, optional): others args to give to 'drawio' cmd. Defaults to {}.
 
     Returns:
-        _type_: _description_
+        int: success
     """
     # sync possible ?
     if(not sync_all_pages and page_to_sync == -1):
         print("sync impossible, chose all pages or a specific page")
         return -1
     sync_file_path = define_sync_file_path(drawio_file)
-    previous_sync_information = load_sync_information(sync_information_file=sync_file_path)
+    previous_sync_information = load_sync_information(
+        sync_information_file=sync_file_path)
     # get information per page
     pages_information = extract_pages_information_from_drawio_file(drawio_file)
     # sync one page, check page exist
@@ -118,11 +130,12 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
     for page_num, page_information in pages_information.items():
         page_name = page_information["name"]
         path_img = os.path.join(output_folder, f"{page_name}.{format}")
-        page_information["path"] = os.path.join(os.getcwd(),path_img)
-        page_was_updated = previous_sync_information.get(page_num) != page_information
+        page_information["path"] = os.path.join(os.getcwd(), path_img)
+        page_was_updated = previous_sync_information.get(
+            page_num) != page_information
         # sync only if the image isn't sync (or in force mode)
-        if(force_sync or (not force_sync and page_was_updated)):
-            cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd}"
+        if(force_sync or page_was_updated):
+            cmd = f"drawio -x {drawio_file} -o \"{path_img}\" -p {page_num} -format {format} {kwargs_cmd}"
             cmds.append(cmd)
     # handle case where n_threads is upper then len(pages)
     n_threads = min(n_threads, len(pages_information))
@@ -132,13 +145,13 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
     # create thread and start it
     for i_thread in range(n_threads):
         thread = threading.Thread(
-            target=save_pages_to_imgs_by_cmds, args=(cmds_by_thread[i_thread],))
+            target=execute_pool_commands, args=(cmds_by_thread[i_thread],))
         threads.append(thread)
         thread.start()
-    # join thread
+    # join threads
     for thread in threads:
         thread.join()
-    save_sync_information(sync_file_path,pages_information)
+    save_sync_information(sync_file_path, pages_information)
     return 0
 
 
