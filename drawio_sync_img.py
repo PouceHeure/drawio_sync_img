@@ -68,6 +68,7 @@ def load_sync_information(sync_information_file):
         data = yaml.load(file, Loader=yaml.FullLoader)
     return data
 
+
 # methods: utils
 
 
