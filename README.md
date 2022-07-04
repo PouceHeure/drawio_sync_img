@@ -18,7 +18,7 @@ export PATH=$PATH:/path/this/folder
 
 Run the following command
 ```
-$ drawio_sync_img -f path/to/drawio/file -o path/output/folder {-a} {-p x} {-t x} {--force}
+$ drawio_sync_img -f path/to/drawio/file -o path/to/output/folder {-a} {-p x} {-t x} {--force}
 # x = number
 $ drawio_sync_img --help
 usage: drawio_sync_img.py [-h] -f FILE [-o OUTPUT] [-a] [-p PAGE] [-t THREADS] [--force]
@@ -42,7 +42,7 @@ Run example:
 $ drawio_sync_img -f example/example_multi_pages.drawio -o example/img/
 ```
 
-- images should be saved in [example/img/](example/img/) folder;
+- images should be saved in example/img/ folder;
 - sync information [example/.sync.example_multi_pages.yaml](./example/.sync.example_multi_pages.yaml) should be updated; 
 
 
