@@ -37,7 +37,13 @@ optional arguments:
 
 ## Example
 
-TODO
+Run example: 
+```
+$ drawio_sync_img -f example/example_multi_pages.drawio -o example/img/
+```
+
+- images should be saved in [example/img/](example/img/) folder;
+- sync information [example/.sync.example_multi_pages.yaml](./example/.sync.example_multi_pages.yaml) should be updated; 
 
 
 ## References
