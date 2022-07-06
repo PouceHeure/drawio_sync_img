@@ -27,8 +27,7 @@ def extract_pages_information_from_drawio_file(drawio_file):
     for child in root:
         pages[page_n] = {}
         pages[page_n]["name"] = child.attrib["name"]
-        pages[page_n]["hash"] = int(hashlib.sha1(
-            child.text.encode('utf-8')).hexdigest(), 16)
+        pages[page_n]["hash"] = int(hashlib.sha1(child.text.encode('utf-8')).hexdigest(), 16)
         page_n += 1
     return pages
 
@@ -84,6 +83,7 @@ def devide_list_into_n_sublists(raw_list, n_sublists):
     for i in range(len(raw_list)):
         sublists[i % n_sublists].append(raw_list[i])
     return sublists
+
 
 # methods: pipeline
 
