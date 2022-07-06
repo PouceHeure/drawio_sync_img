@@ -6,6 +6,7 @@ import argparse
 import xml.etree.ElementTree as ET
 import threading
 import hashlib
+import subprocess
 
 
 # methods: get information about drawio document
@@ -42,7 +43,8 @@ def execute_pool_commands(cmds):
         cmds (list(str)): list of cmd to execute 
     """
     for cmd in cmds:
-        os.system(cmd)
+        new_cmd = cmd.split(" ")
+        subprocess.run(new_cmd,shell=False)
 
 
 # methods: sync
@@ -142,7 +144,7 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
             page_num) != page_information
         # sync only if the image isn't sync (or in force mode)
         if(force_sync or page_was_updated):
-            cmd = f"drawio -x {drawio_file} -o \"{path_img}\" -p {page_num} -format {format} {kwargs_cmd}"
+            cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd}"
             cmds.append(cmd)
     # handle case where n_threads is upper then len(pages)
     n_threads = min(n_threads, len(pages_information))
