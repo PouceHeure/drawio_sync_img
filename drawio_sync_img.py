@@ -106,7 +106,6 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
         format (str, optional): format img generated. Defaults to "png".
         n_threads (int, optional): threads number. Defaults to 4.
         force_sync (bool, optional): force sync even the img is already update. Defaults to False.
-        scale_output (int, optional): scale output (improve the output quality). Defaults to 4.
         kwargs (dict, optional): others args to give to 'drawio' cmd. Defaults to {}.
 
     Returns:
@@ -146,7 +145,7 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
             page_num) != page_information
         # sync only if the image isn't sync (or in force mode)
         if(force_sync or page_was_updated):
-            cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd} -s {scale_output}"
+            cmd = f"drawio -x {drawio_file} -o {path_img} -p {page_num} -format {format} {kwargs_cmd}"
             cmds.append(cmd)
     # handle case where n_threads is upper then len(pages)
     n_threads = min(n_threads, len(pages_information))
