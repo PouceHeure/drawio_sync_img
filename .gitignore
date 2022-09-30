@@ -6,3 +6,6 @@ example/img/*
 example/*
 !example/example_multi_pages.drawio
 !example/.sync.example_multi_pages.yaml
+
+# tickets
+.github.*
