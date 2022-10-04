@@ -94,7 +94,7 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
                               format="png",
                               n_threads=4,
                               force_sync=False,
-                              scale_output=4,
+                              prefix=None,
                               kwargs={}):
     """
     Synhronize images from drawio file.
@@ -139,7 +139,10 @@ def sync_img_from_drawio_file(drawio_file, output_folder,
     cmds = []
     for page_num, page_information in pages_information.items():
         page_name = page_information["name"]
-        path_img = os.path.join(output_folder, f"{page_name}.{format}")
+        filename = page_name
+        if(prefix != None): 
+            filename = f"{prefix}_{page_name}"
+        path_img = os.path.join(output_folder, f"{filename}.{format}")
         page_information["path"] = os.path.join(os.getcwd(), path_img)
         page_was_updated = previous_sync_information.get(
             page_num) != page_information
@@ -177,6 +180,8 @@ if __name__ == "__main__":
                         type=int, default=-1)
     parser.add_argument("-t", "--threads", help="threads number",
                         type=int, default=4)
+    parser.add_argument("--prefix", help="prefix string, put to filename img",
+                        type=str, default=None)
     parser.add_argument("--force", help="force sync all images",
                         action="store_true", default=False)
 
@@ -195,6 +200,7 @@ if __name__ == "__main__":
                                        page_to_sync=args.page,
                                        n_threads=args.threads,
                                        force_sync=args.force,
+                                       prefix=args.prefix,
                                        kwargs=unknown_args)
 
     exit(succes)
